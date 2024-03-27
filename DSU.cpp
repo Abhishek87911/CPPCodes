@@ -27,12 +27,12 @@ public:
         if(size[ulp_u] < size[ulp_v]) {
             parent[ulp_u] = ulp_v; 
             size[ulp_v] += size[ulp_u]; 
-            mx=max(mx,size[ulp_u]);
+            mx=max(mx,size[ulp_v]);
         }
         else {
             parent[ulp_v] = ulp_u;
             size[ulp_u] += size[ulp_v]; 
-            mx=max(mx,size[ulp_v]);
+            mx=max(mx,size[ulp_u]);
         }
         noOfComponents--;
     }
