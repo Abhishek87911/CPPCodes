@@ -1,43 +1,37 @@
-class DSU {
-    vector<int>  parent, size; 
-    int mx=0;
-    int noOfComponents;
+struct DSU {
 public: 
-    DSU(int n) {
-        
-        parent.resize(n+1);
-        size.resize(n+1); 
-        for(int i = 0;i<=n;i++) {
-            parent[i] = i; 
-            size[i] = 1; 
-            noOfComponents=n;
-        }
-    }
+  vector<int> parent,size;
+  int n;
 
-    int findUPar(int node) {
-        if(node == parent[node])
-            return node; 
-        return parent[node] = findUPar(parent[node]); 
-    }
-
-    void unionBySize(int u, int v) {
-        int ulp_u = findUPar(u); 
-        int ulp_v = findUPar(v); 
-        if(ulp_u == ulp_v) return; 
-        if(size[ulp_u] < size[ulp_v]) {
-            parent[ulp_u] = ulp_v; 
-            size[ulp_v] += size[ulp_u]; 
-            mx=max(mx,size[ulp_v]);
-        }
-        else {
-            parent[ulp_v] = ulp_u;
-            size[ulp_u] += size[ulp_v]; 
-            mx=max(mx,size[ulp_u]);
-        }
-        noOfComponents--;
-    }
-  int giveNoOfComponenets() {
-    return noOfComponents;
+  DSU(int _n)
+  {
+    n=_n;
+    parent.resize(n+1);
+    size.resize(n+1,1);
+    for(int i=0;i<=n;i++) parent[i]=i;
+  }
+  
+  int findUlPar(int u)
+  {
+    if(parent[u]==u) return u;
+    return parent[u] = findUlPar(parent[u]);
   }
 
+  void merge(int u,int v)
+  {
+    int ulp_u = findUlPar(u);
+    int ulp_v = findUlPar(v);
+
+    if(ulp_u == ulp_v)  return;
+
+    if(size[ulp_u]<size[ulp_v]){
+      swap(ulp_u,ulp_v);
+      swap(u,v);
+    }
+
+    size[ulp_u]+=size[ulp_v];
+    parent[ulp_v]=ulp_u;
+  }
+
+  
 };
