@@ -12,7 +12,7 @@ struct SegTree {
             s = s << 1;
         }
         tree.resize(s);
-        fill(all(tree), Node());
+        fill(tree.begin(),tree.end(), Node());
         build(0, n - 1, 1);
     }
     void build(int start, int end, int index)  // Never change this
