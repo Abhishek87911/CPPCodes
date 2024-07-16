@@ -57,3 +57,23 @@ int query(int start, int end, int index, vector<int>& SGT, int l, int r){
     int rightAns = query(mid + 1, end, right(index), SGT, l, r);
     return merge(leftAns, rightAns);
 }
+
+void solve(){
+    int n;
+    cin >> n;
+    vector<int> arr(n);
+    for(auto &i : arr){
+        cin >> i;
+    }
+    vector<int> SGT(4 * n + 1);
+    build(0, n - 1, 1, SGT, arr); // built the segment tree
+ 
+    cout << query(0, n - 1, 1, SGT, 0, 1) << endl;
+    cout << query(0, n - 1, 1, SGT, 2, 3) << endl;
+    cout << query(0, n - 1, 1, SGT, 2, 6) << endl;
+    
+    update(0, n - 1, 1, SGT, 0, 100);
+    
+    cout << query(0, n - 1, 1, SGT, 0, 1) << endl;
+}
+ 
