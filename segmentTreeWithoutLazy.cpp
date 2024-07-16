@@ -1,98 +1,59 @@
-template<typename Node, typename Update>
-struct SegTree {
-    vector<Node> tree;
-    vector<ll> arr; // type may change
-    int n;
-    int s;
-    SegTree(int a_len, vector<ll> &a) { // change if type updated
-        arr = a;
-        n = a_len;
-        s = 1;
-        while(s < 2 * n){
-            s = s << 1;
-        }
-        tree.resize(s);
-        fill(tree.begin(),tree.end(), Node());
-        build(0, n - 1, 1);
+int left(int index){
+    return 2 * index;
+}
+int right(int index){
+    return 2 * index + 1;
+}
+
+int merge(int left, int right){
+    return __gcd(left, right);
+}
+
+int default_value(){
+    return 0;
+}
+
+// O(n)
+void build(int start, int end, int index, vector<int>& SGT, vector<int>& arr){
+    if(start == end){
+        SGT[index] = arr[start];
+        return;
     }
-    void build(int start, int end, int index)  // Never change this
-    {
-        if (start == end)   {
-            tree[index] = Node(arr[start]);
-            return;
-        }
-        int mid = (start + end) / 2;
-        build(start, mid, 2 * index);
-        build(mid + 1, end, 2 * index + 1);
-        tree[index].merge(tree[2 * index], tree[2 * index + 1]);
+    int mid = (start + end) / 2;
+    build(start, mid, left(index), SGT, arr);  // built left part
+    build(mid + 1, end, right(index), SGT, arr); // build right part
+    SGT[index] = merge(SGT[left(index)], SGT[right(index)]); // merge two answer;
+}
+
+// O(logn)
+void update(int start, int end, int index, vector<int>& SGT, int pos, int val){
+    if(start == end){ // reached your destination
+        SGT[index] = val;
+        return;
     }
-    void update(int start, int end, int index, int query_index, Update &u)  // Never Change this
-    {
-        if (start == end) {
-            u.apply(tree[index]);
-            return;
-        }
-        int mid = (start + end) / 2;
-        if (mid >= query_index)
-            update(start, mid, 2 * index, query_index, u);
-        else
-            update(mid + 1, end, 2 * index + 1, query_index, u);
-        tree[index].merge(tree[2 * index], tree[2 * index + 1]);
+    int mid = (start + end) / 2;
+    if(pos <= mid){
+        update(start, mid, left(index), SGT, pos, val); // update left side
+    }else{
+        update(mid + 1, end, right(index), SGT, pos, val); // update right side
     }
-    Node query(int start, int end, int index, int left, int right) { // Never change this
-        if (start > right || end < left) // disjoint
-            return Node();
-        if (start >= left && end <= right) // complete overlap
-            return tree[index];
-        int mid = (start + end) / 2;
-        // partial overlap
-        Node l, r, ans;
-        l = query(start, mid, 2 * index, left, right);
-        r = query(mid + 1, end, 2 * index + 1, left, right);
-        ans.merge(l, r);
-        return ans;
+    SGT[index] = merge(SGT[left(index)], SGT[right(index)]); // merge two answer;
+}
+
+// O(logn)
+int query(int start, int end, int index, vector<int>& SGT, int l, int r){
+    // complete overlap
+    // [l..... start... end.... r]
+    if(l <= start && r >= end){
+        return SGT[index];
     }
-    void make_update(int index, ll val) {  // pass in as many parameters as required
-        Update new_update = Update(val); // may change
-        update(0, n - 1, 1, index, new_update);
+    // disjoint
+    // [start.... end... l... r] or [l... r.... start ... end]
+    if(end < l || r < start){
+        return default_value();
     }
-    Node make_query(int left, int right) {
-        return query(0, n - 1, 1, left, right);
-    }
-};
-
-struct Node1{
-    ll val; // may change
-    Node1() { // Identity element
-        val = INF;    // may change
-    }
-    Node1(ll p1) {  // Actual Node
-        val = p1; // may change
-    }
-    void merge(Node1 &l, Node1 &r) { // Merge two child nodes
-        val = min(l.val, r.val);  // may change
-    }
-};
-
-struct Update1 {
-    ll val; // may change
-    Update1(ll p1) { // Actual Update
-        val = p1; // may change
-    }
-    void apply(Node1 &a) { // apply update to given node
-        a.val = min(a.val, val); // may change
-    }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
+    int mid = (start + end) / 2;
+    int leftAns = query(start, mid, left(index), SGT, l, r);
+    int rightAns = query(mid + 1, end, right(index), SGT, l, r);
+    return merge(leftAns, rightAns);
+}
