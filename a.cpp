@@ -1,59 +1,79 @@
+//{ Driver Code Starts
 #include <bits/stdc++.h>
-
 using namespace std;
 
-const long long MOD = 1000000007;
 
-long long calculateWays(long long N, long long K, const string& S, const vector<long long>& A);
-bool isValidSubstr(const vector<long long>& charCount, const vector<long long>& A);
-void updateCharCount(vector<long long>& charCount, char ch, int delta);
-
-long long calculateWays(long long N, long long K, const string& S, const vector<long long>& A) {
-    vector<vector<long long>> dp(N + 1, vector<long long>(K + 1, 0));
-    dp[0][0] = 1;
-
-    for (long long i = 1; i <= N; ++i) {
-        vector<long long> charCount(26, 0);
-        for (long long j = i; j >= 1; --j) {
-            updateCharCount(charCount, S[j - 1], 1);
-            if (isValidSubstr(charCount, A)) {
-                for (long long k = 1; k <= K; ++k) {
-                    dp[i][k] = (dp[i][k] + dp[j - 1][k - 1]) % MOD;
+// } Driver Code Ends
+class Solution {
+  public:
+  vector<int> computeLPS(string &pat)
+  {
+      int m = pat.size();
+      vector<int> LPS(m,0);
+      int len=0;
+      int i=1;
+      while(i<m)
+      {
+          if(pat[i]==pat[len]) {
+              len++;
+              LPS[i]=len;
+              i++;
+          }
+          else {
+              if(len!=0) len = LPS[len-1];
+              else {
+                  LPS[i]=0;
+                  i++;
+              }
+          }
+      }
+      return LPS;
+  }
+    vector<int> search(string& pat, string& txt) {
+        vector<int> ans;
+        vector<int> LPS = computeLPS(pat);
+        int i=0,j=0;
+        int m = pat.size();
+        while(i<txt.size()) 
+        {
+            if(pat[j]==txt[i]) {
+                i++;
+                j++;
+            }
+            if(j==m) {
+                ans.push_back(i-j+1);// 1 based index;
+                j=LPS[j-1];
+            }
+            else if(pat[j]!=txt[i]){
+                if(j!=0) {
+                    j=LPS[j-1];
                 }
-            } else {
-                break;
+                else i++;
             }
         }
+        return ans;
     }
+};
 
-    return dp[N][K];
-}
 
-bool isValidSubstr(const vector<long long>& charCount, const vector<long long>& A) {
-    for (long long k = 0; k < 26; ++k) {
-        if (charCount[k] > A[k]) {
-            return false;
+//{ Driver Code Starts.
+int main() {
+    int t;
+    cin >> t;
+    while (t--) {
+        string S, pat;
+        cin >> S >> pat;
+        Solution ob;
+        vector<int> res = ob.search(pat, S);
+        if (res.size() == 0)
+            cout << "[]" << endl;
+        else {
+            for (int i : res)
+                cout << i << " ";
+            cout << endl;
         }
     }
-    return true;
-}
-
-void updateCharCount(vector<long long>& charCount, char ch, int delta) {
-    charCount[ch - 'a'] += delta;
-}
-
-int main() {
-    long long N, K;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<long long> A(26);
-    for (long long i = 0; i < 26; ++i) {
-        cin >> A[i];
-    }
-    cin >> K;
-
-    long long result = calculateWays(N, K, S, A);
-    cout << result << endl;
     return 0;
 }
+
+// } Driver Code Ends
